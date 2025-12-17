@@ -1,7 +1,7 @@
 extends Node2D
 
 const CIRCLE_COUNT := 5
-const BASE_SPEED := 120.0
+const BASE_SPEED := 100.0
 const SPEED_VARIATION := 32.0
 const DISTURBANCE_PAUSE := 0.06
 const TENSION_STEP := 1.03
@@ -105,7 +105,7 @@ func _disturb_circles() -> void:
     await get_tree().create_timer(DISTURBANCE_PAUSE).timeout
     for circle in circles:
         var angle := deg_to_rad(rng.randi_range(-50, 50))
-        var multiplier := rng.randf_range(1.02, 1.18)
+        var multiplier := rng.randf_range(1.015, 1.13)
         circle.velocity = circle.velocity.rotated(angle) * multiplier * tension_multiplier
     disturbing = false
 

@@ -6,7 +6,7 @@ var color: Color = Color.WHITE
 
 func _ready() -> void:
     set_process(false)
-    update()
+    queue_redraw()
 
 func _draw() -> void:
     draw_circle(Vector2.ZERO, radius, color)
@@ -34,4 +34,4 @@ func apply_velocity(delta: float, bounds: Rect2) -> void:
         bounced = true
 
     if bounced:
-        update()
+        queue_redraw()
