@@ -7,6 +7,14 @@ const DISTURBANCE_PAUSE := 0.06
 const TENSION_STEP := 1.03
 const SPAWN_PADDING := 36.0
 const SPAWN_SEPARATION := 12.0
+const DEGRADATION_STEP := 2
+const DEGRADATION_COLORS := [
+    Color(1.0, 1.0, 1.0),
+    Color(0.9, 0.94, 1.0),
+    Color(0.78, 0.86, 0.96),
+    Color(0.66, 0.76, 0.9),
+    Color(0.54, 0.64, 0.82)
+]
 
 @onready var ui_layer: CanvasLayer = $UI
 @onready var hud_label: Label = $UI/HudLabel
@@ -15,6 +23,7 @@ const SPAWN_SEPARATION := 12.0
 @onready var result_disturbances: Label = $UI/EndPanel/VBoxContainer/DisturbanceLabel
 @onready var result_last: Label = $UI/EndPanel/VBoxContainer/LastDisturbanceLabel
 @onready var end_message: Label = $UI/EndPanel/VBoxContainer/MessageLabel
+@onready var flash_overlay: ColorRect = $FlashOverlay
 
 var circles: Array[Node2D] = []
 var rng := RandomNumberGenerator.new()
@@ -25,11 +34,13 @@ var disturbance_count := 0
 var last_disturbance_time := -1.0
 var tension_multiplier := 1.0
 var disturbing := false
+var current_degradation_level := 0
 
 func _ready() -> void:
     rng.randomize()
     start_time = _get_now()
     _spawn_circles()
+    _apply_degradation_color(_current_degradation_color())
     _update_hud()
 
 func _process(delta: float) -> void:
@@ -59,7 +70,7 @@ func _spawn_circles() -> void:
     for i in CIRCLE_COUNT:
         var circle: Node2D = circle_scene.new()
         circle.radius = 17.5
-        circle.color = Color.from_hsv(rng.randf(), 0.35, 1.0)
+        circle.color = _current_degradation_color()
         circle.velocity = _random_velocity()
         circle.position = _find_free_position(circle.radius, bounds)
         add_child(circle)
@@ -103,6 +114,7 @@ func _disturb_circles() -> void:
     disturbance_count += 1
     last_disturbance_time = _get_now() - start_time
     tension_multiplier *= TENSION_STEP
+    _update_degradation_state()
     await get_tree().create_timer(DISTURBANCE_PAUSE).timeout
     for circle in circles:
         var angle := deg_to_rad(rng.randi_range(-50, 50))
@@ -134,3 +146,28 @@ func _update_hud() -> void:
 
 func _get_now() -> float:
     return Time.get_ticks_msec() / 1000.0
+
+func _current_degradation_color() -> Color:
+    return DEGRADATION_COLORS[current_degradation_level]
+
+func _calculate_degradation_level(count: int) -> int:
+    var level := count / DEGRADATION_STEP
+    return clamp(level, 0, DEGRADATION_COLORS.size() - 1)
+
+func _apply_degradation_color(color: Color) -> void:
+    for circle in circles:
+        circle.set_degradation_color(color)
+
+func _update_degradation_state() -> void:
+    var new_level := _calculate_degradation_level(disturbance_count)
+    if new_level == current_degradation_level:
+        return
+
+    current_degradation_level = new_level
+    _apply_degradation_color(_current_degradation_color())
+    _signal_degradation_shift()
+
+func _signal_degradation_shift() -> void:
+    var tween := create_tween()
+    tween.tween_property(flash_overlay, "color:a", 0.2, 0.08).set_trans(Tween.TRANS_SINE)
+    tween.tween_property(flash_overlay, "color:a", 0.0, 0.18).set_trans(Tween.TRANS_SINE)
