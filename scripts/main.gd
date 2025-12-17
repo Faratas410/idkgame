@@ -1,8 +1,10 @@
 extends Node2D
 
 const CIRCLE_COUNT := 5
-const BASE_SPEED := 140.0
-const SPEED_VARIATION := 40.0
+const BASE_SPEED := 120.0
+const SPEED_VARIATION := 32.0
+const DISTURBANCE_PAUSE := 0.06
+const TENSION_STEP := 1.03
 const SPAWN_PADDING := 36.0
 
 @onready var ui_layer: CanvasLayer = $UI
@@ -20,6 +22,8 @@ var start_time := 0.0
 var end_time := 0.0
 var disturbance_count := 0
 var last_disturbance_time := -1.0
+var tension_multiplier := 1.0
+var disturbing := false
 
 func _ready() -> void:
     rng.randomize()
@@ -92,12 +96,18 @@ func _check_collisions() -> void:
                 return
 
 func _disturb_circles() -> void:
+    if disturbing:
+        return
+    disturbing = true
     disturbance_count += 1
     last_disturbance_time = _get_now() - start_time
+    tension_multiplier *= TENSION_STEP
+    await get_tree().create_timer(DISTURBANCE_PAUSE).timeout
     for circle in circles:
-        var angle := deg_to_rad(rng.randi_range(-65, 65))
-        var multiplier := rng.randf_range(1.05, 1.35)
-        circle.velocity = circle.velocity.rotated(angle) * multiplier
+        var angle := deg_to_rad(rng.randi_range(-50, 50))
+        var multiplier := rng.randf_range(1.02, 1.18)
+        circle.velocity = circle.velocity.rotated(angle) * multiplier * tension_multiplier
+    disturbing = false
 
 func _end_game() -> void:
     if not game_running:
