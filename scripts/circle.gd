@@ -11,6 +11,10 @@ func _ready() -> void:
 func _draw() -> void:
     draw_circle(Vector2.ZERO, radius, color)
 
+func set_degradation_color(new_color: Color) -> void:
+    color = new_color
+    queue_redraw()
+
 func apply_velocity(delta: float, bounds: Rect2) -> void:
     position += velocity * delta
     var bounced := false
