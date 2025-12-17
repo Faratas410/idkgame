@@ -57,7 +57,7 @@ func _spawn_circles() -> void:
 
     for i in CIRCLE_COUNT:
         var circle: Node2D = circle_scene.new()
-        circle.radius = 18.0
+        circle.radius = 17.5
         circle.color = Color.from_hsv(rng.randf(), 0.35, 1.0)
         circle.velocity = _random_velocity()
         circle.position = _find_free_position(circle.radius, bounds)
