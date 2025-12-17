@@ -1,0 +1,8 @@
+[gd_project settings_version=5]
+
+[application]
+config/name="Stillness"
+run/main_scene="res://scenes/main.tscn"
+
+[rendering]
+quality/driver/driver_name="GLES2"
