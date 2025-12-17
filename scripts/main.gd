@@ -1,7 +1,7 @@
 extends Node2D
 
 const CIRCLE_COUNT := 5
-const BASE_SPEED := 120.0
+const BASE_SPEED := 100.0
 const SPEED_VARIATION := 32.0
 const DISTURBANCE_PAUSE := 0.06
 const TENSION_STEP := 1.03
