@@ -6,6 +6,7 @@ const SPEED_VARIATION := 32.0
 const DISTURBANCE_PAUSE := 0.06
 const TENSION_STEP := 1.03
 const SPAWN_PADDING := 36.0
+const SPAWN_SEPARATION := 12.0
 
 @onready var ui_layer: CanvasLayer = $UI
 @onready var hud_label: Label = $UI/HudLabel
@@ -74,7 +75,7 @@ func _find_free_position(radius: float, bounds: Rect2) -> Vector2:
         )
         var overlaps := false
         for other in circles:
-            if pos.distance_to(other.position) <= radius + other.radius + 4.0:
+            if pos.distance_to(other.position) <= radius + other.radius + SPAWN_SEPARATION:
                 overlaps = true
                 break
         if not overlaps:
